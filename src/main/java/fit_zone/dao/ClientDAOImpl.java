@@ -77,6 +77,17 @@ public class ClientDAOImpl implements IClientDAO{
 
     @Override
     public boolean save(Client client) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(INSERT)) {
+
+            ps.setString(1, client.getName());
+            ps.setString(2, client.getSurname());
+            ps.setInt(3, client.getMembershipCode());
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error saving client: " + e.getMessage());
+        }
         return false;
     }
 
@@ -109,6 +120,18 @@ public class ClientDAOImpl implements IClientDAO{
             System.out.println(client);
         } else {
             System.out.println("Client not found");
+        }
+
+        // save Test
+        IClientDAO clientDAO = new ClientDAOImpl();
+        Client client = new Client("Nicolas", "Camps", 555);
+        boolean addedSuccessfully = clientDAO.save(client);
+        if (addedSuccessfully) {
+            System.out.println("New client added.");
+            List<Client> clients = clientDAO.findAll();
+            clients.forEach(System.out::println);
+        } else {
+            System.out.println("Error adding new client.");
         }
         */
     }
