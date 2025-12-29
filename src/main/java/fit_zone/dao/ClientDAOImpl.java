@@ -54,11 +54,14 @@ public class ClientDAOImpl implements IClientDAO{
 
     @Override
     public Client findById(int id) {
+
         Client client = null;
 
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(SELECT_BY_ID);
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SELECT_BY_ID)) {
+
             ps.setInt(1, id);
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     client = new Client();
@@ -68,12 +71,14 @@ public class ClientDAOImpl implements IClientDAO{
                     client.setMembershipCode(rs.getInt("membership_code"));
                 }
             }
+
         } catch (SQLException e) {
-            System.out.println("Error retrieving client with id: " + id + " " + e.getMessage());
+            System.out.println("Error retrieving client with id " + id + ": " + e.getMessage());
         }
 
         return client;
     }
+
 
     @Override
     public boolean save(Client client) {
@@ -93,21 +98,23 @@ public class ClientDAOImpl implements IClientDAO{
 
     @Override
     public boolean update(Client client) {
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(UPDATE);
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(UPDATE)) {
+
             ps.setString(1, client.getName());
             ps.setString(2, client.getSurname());
             ps.setInt(3, client.getMembershipCode());
             ps.setInt(4, client.getId());
 
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            System.out.println("Error updating client " + e.getMessage());
+            System.out.println("Error updating client: " + e.getMessage());
             return false;
         }
     }
+
 
     @Override
     public boolean delete(int id) {
@@ -125,65 +132,4 @@ public class ClientDAOImpl implements IClientDAO{
             return false;
         }
     }
-
-    public static void main(String[] args) {
-        // Client listing test
-        /*
-        System.out.println("*** findAll Test ***");
-        IClientDAO clientDAO = new ClientDAOImpl();
-        List<Client> clients = clientDAO.findAll();
-        clients.forEach(System.out::println);
-
-
-        // findById Test
-        IClientDAO clientDAO = new ClientDAOImpl();
-
-        System.out.println("*** findById Test ***");
-        Client client = clientDAO.findById(2);
-
-        if (client != null) {
-            System.out.println(client);
-        } else {
-            System.out.println("Client not found");
-        }
-
-        // save Test
-        IClientDAO clientDAO = new ClientDAOImpl();
-        Client client = new Client("Nicolas", "Camps", 555);
-        boolean addedSuccessfully = clientDAO.save(client);
-        if (addedSuccessfully) {
-            System.out.println("New client added.");
-            List<Client> clients = clientDAO.findAll();
-            clients.forEach(System.out::println);
-        } else {
-            System.out.println("Error adding new client.");
-        }
-
-        System.out.println("*** update Test ***");
-
-        IClientDAO clientDAO = new ClientDAOImpl();
-        Client clientToUpdate = new Client(2, "Sol", "Santoro Updated", 444);
-
-        boolean updated = clientDAO.update(clientToUpdate);
-
-        if (updated) {
-            System.out.println("Client updated successfully.");
-            clientDAO.findAll().forEach(System.out::println);
-        } else {
-            System.out.println("Client not found or not updated.");
-        }
-        System.out.println("*** delete Test ***");
-
-        IClientDAO clientDAO = new ClientDAOImpl();
-
-        boolean deleted = clientDAO.delete(2);// Use an existing id
-
-        if (deleted) {
-            System.out.println("Client deleted successfully.");
-            clientDAO.findAll().forEach(System.out::println);
-        } else {
-            System.out.println("Client not found or not deleted.");
-        }*/
-    }
-
 }
