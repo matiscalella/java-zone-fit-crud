@@ -10,23 +10,42 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientDAOImpl implements IClientDAO{
+/**
+ * JDBC implementation of the {@link IClientDAO} interface.
+ *
+ * <p>This class provides concrete implementations of CRUD operations
+ * for {@link Client} entities using plain JDBC and a MySQL database.</p>
+ *
+ * <p>All SQL statements are defined as constants and executed using
+ * {@link PreparedStatement} to ensure security and performance.</p>
+ */
+public class ClientDAOImpl implements IClientDAO {
 
+    /** SQL query to retrieve all clients ordered by id */
     private static final String SELECT_ALL =
             "SELECT id, name, surname, membership_code FROM clients ORDER BY id";
 
+    /** SQL query to retrieve a client by its identifier */
     private static final String SELECT_BY_ID =
             "SELECT id, name, surname, membership_code FROM clients WHERE id = ?";
 
+    /** SQL query to insert a new client */
     private static final String INSERT =
             "INSERT INTO clients (name, surname, membership_code) VALUES (?, ?, ?)";
 
+    /** SQL query to update an existing client */
     private static final String UPDATE =
             "UPDATE clients SET name = ?, surname = ?, membership_code = ? WHERE id = ?";
 
+    /** SQL query to delete a client by its identifier */
     private static final String DELETE =
             "DELETE FROM clients WHERE id = ?";
 
+    /**
+     * Retrieves all clients from the database.
+     *
+     * @return a list of {@link Client} objects, or an empty list if none are found
+     */
     @Override
     public List<Client> findAll() {
 
@@ -52,6 +71,12 @@ public class ClientDAOImpl implements IClientDAO{
         return clients;
     }
 
+    /**
+     * Retrieves a client by its unique identifier.
+     *
+     * @param id the client identifier
+     * @return the {@link Client} if found, or {@code null} otherwise
+     */
     @Override
     public Client findById(int id) {
 
@@ -79,9 +104,16 @@ public class ClientDAOImpl implements IClientDAO{
         return client;
     }
 
-
+    /**
+     * Saves a new client in the database.
+     *
+     * @param client the client to be saved
+     * @return {@code true} if the client was successfully saved,
+     *         {@code false} otherwise
+     */
     @Override
     public boolean save(Client client) {
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(INSERT)) {
 
@@ -90,12 +122,20 @@ public class ClientDAOImpl implements IClientDAO{
             ps.setInt(3, client.getMembershipCode());
 
             return ps.executeUpdate() > 0;
+
         } catch (SQLException e) {
             System.out.println("Error saving client: " + e.getMessage());
+            return false;
         }
-        return false;
     }
 
+    /**
+     * Updates an existing client in the database.
+     *
+     * @param client the client containing updated data
+     * @return {@code true} if the client was successfully updated,
+     *         {@code false} otherwise
+     */
     @Override
     public boolean update(Client client) {
 
@@ -115,7 +155,13 @@ public class ClientDAOImpl implements IClientDAO{
         }
     }
 
-
+    /**
+     * Deletes a client from the database using its identifier.
+     *
+     * @param id the client identifier
+     * @return {@code true} if the client was successfully deleted,
+     *         {@code false} otherwise
+     */
     @Override
     public boolean delete(int id) {
 
@@ -124,8 +170,7 @@ public class ClientDAOImpl implements IClientDAO{
 
             ps.setInt(1, id);
 
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
             System.out.println("Error deleting client: " + e.getMessage());
